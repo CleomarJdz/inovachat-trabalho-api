@@ -1,0 +1,50 @@
+{% extends 'base.html' %}{% block content %}
+<div class="header">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="INOVACHAT 2.0" style="height: 40px; margin-right: 20px;">
+    <div>
+        <span style="color: #888; font-size: 14px;">Olá, {{session.nome}}</span>
+        <a href='/logout' style="margin-left: 10px;">Sair</a>
+    </div>
+</div>
+
+<div class="chat-container" id="chatContainer">
+    {% if historico|length == 0 %}
+    <div class="empty-state">
+        <h2 style="color: #ccc; margin-bottom: 10px;">Bem-vindo ao INOVACHAT 2.0</h2>
+        <p>Comece uma conversa fazendo uma pergunta ao Gemini</p>
+    </div>
+    {% else %}
+    {% for item in historico|reverse %}
+    <div class="message user">
+        <div class="message-content">{{ item.pergunta }}</div>
+    </div>
+    <div class="message assistant">
+        <div class="message-content">{{ item.resposta|markdown|safe }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<div class="form-container">
+    <form method='post' style="display: flex; gap: 10px; width: 100%;">
+        <input 
+            type='text' 
+            name='pergunta' 
+            placeholder='Digite sua pergunta...' 
+            autocomplete='off'
+            required
+        >
+        <button type='submit'>Enviar</button>
+    </form>
+</div>
+
+<script>
+    // Auto-scroll para o final
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // Focus no input após enviar
+    document.querySelector('input[name="pergunta"]').focus();
+</script>
+
+{% endblock %}

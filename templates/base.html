@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang='pt-br'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>INOVACHAT 2.0 - IA Chat</title>
+<link rel='icon' href='{{ url_for("static", filename="favicon.ico") }}' type='image/x-icon'>
+<link rel='stylesheet' href='{{ url_for("static", filename="style.css") }}'>
+</head>
+<body>
+<div class='container'>
+{% with messages = get_flashed_messages() %}
+{% for msg in messages %}<div class='alert' style='animation: slideIn 0.3s ease;'>{{msg}}</div>{% endfor %}
+{% endwith %}
+{% block content %}{% endblock %}
+</div>
+</body>
+</html>

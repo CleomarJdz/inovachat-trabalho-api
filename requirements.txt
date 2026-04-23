@@ -1,0 +1,6 @@
+flask
+flask_sqlalchemy
+werkzeug
+google-generativeai
+markdown
+pillow
