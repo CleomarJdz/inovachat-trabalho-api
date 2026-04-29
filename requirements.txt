@@ -4,3 +4,4 @@ werkzeug
 google-generativeai
 markdown
 pillow
+psycopg2-binary

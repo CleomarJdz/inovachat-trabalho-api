@@ -9,13 +9,13 @@ import os
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "123456"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///inovachat.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:120206@localhost:5432/inovachat"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCusNeFs26xllqT7F-9lfsUBarfd4l4RBg')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAxNX2RDM1CRMlTLyV3zz3XOPBMlt8nVyk')
 genai.configure(api_key=GEMINI_API_KEY)
 
 @app.template_filter('markdown')
