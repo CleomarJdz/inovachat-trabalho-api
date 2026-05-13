@@ -1,24 +1,4 @@
 
-# ===== LANGCHAIN IMPORTS =====
-# Alteração automática realizada para integração com LangChain
-
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-
-# Configuração do modelo
-llm = ChatOpenAI(
-    model="gpt-3.5-turbo",
-    temperature=0.7
-)
-
-prompt = ChatPromptTemplate.from_template(
-    "Responda a seguinte pergunta: {pergunta}"
-)
-
-chain = prompt | llm
-
-# ===== FIM LANGCHAIN =====
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -26,6 +6,9 @@ from datetime import datetime
 import google.generativeai as genai
 import markdown
 import os
+
+# Importar LangChain
+from langchain import perguntar_ia
 
 
 app = Flask(__name__)
@@ -166,14 +149,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-# ===== EXEMPLO DE USO LANGCHAIN =====
-# Alteração automática adicionada
-
-def perguntar_ia(texto):
-    resposta = chain.invoke({
-        "pergunta": texto
-    })
-    return resposta.content
-
-# ===== FIM EXEMPLO =====
