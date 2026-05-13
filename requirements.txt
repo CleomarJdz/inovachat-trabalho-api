@@ -5,3 +5,4 @@ google-generativeai
 markdown
 pillow
 psycopg2-binary
+langchain-openai

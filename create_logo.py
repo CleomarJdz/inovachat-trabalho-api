@@ -1,3 +1,28 @@
+
+# ===== LANGCHAIN IMPORTS =====
+# Alteração automática realizada para integração com LangChain
+
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains import LLMChain
+
+# Configuração do modelo
+llm = ChatOpenAI(
+    model="gpt-3.5-turbo",
+    temperature=0.7
+)
+
+prompt = ChatPromptTemplate.from_template(
+    "Responda a seguinte pergunta: {pergunta}"
+)
+
+chain = LLMChain(
+    llm=llm,
+    prompt=prompt
+)
+
+# ===== FIM LANGCHAIN =====
+
 from PIL import Image, ImageDraw, ImageFont
 import os
 
@@ -33,3 +58,15 @@ draw_logo.text((10, 15), "INOVACHAT 2.0", fill="white", font=font_logo)
 logo.save('static/logo.png')
 
 print("Logo and favicon created!")
+
+# ===== EXEMPLO DE USO LANGCHAIN =====
+# Alteração automática adicionada
+
+def perguntar_ia(texto):
+    resposta = chain.invoke({
+        "pergunta": texto
+    })
+
+    return resposta
+
+# ===== FIM EXEMPLO =====
