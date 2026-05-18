@@ -8,7 +8,7 @@ import markdown
 import os
 
 # Importar LangChain
-from langchain import perguntar_ia
+from langchain import perguntar_ia, VALID_PROMPT_MODES, VALID_PROMPT_TYPES
 
 
 app = Flask(__name__)
@@ -47,10 +47,9 @@ class Conversa(db.Model):
 with app.app_context():
     db.create_all()
 
-def responder_ia(pergunta):
+def responder_ia(pergunta, modo="tecnico", tipo_prompt="simples"):
     try:
-        # Usando LangChain com OpenAI
-        resposta = perguntar_ia(pergunta)
+        resposta = perguntar_ia(pergunta, modo=modo, prompt_type=tipo_prompt)
         return resposta
     except Exception as erro:
         return f'Erro IA: {erro}'
@@ -120,10 +119,15 @@ def chat():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
+    modo = "tecnico"
+    tipo_prompt = "simples"
+
     if request.method == "POST":
 
         pergunta = request.form["pergunta"]
-        resposta = responder_ia(pergunta)
+        modo = request.form.get("modo", modo)
+        tipo_prompt = request.form.get("tipo_prompt", tipo_prompt)
+        resposta = responder_ia(pergunta, modo=modo, tipo_prompt=tipo_prompt)
 
         nova = Conversa(
             usuario_id=session["user_id"],
@@ -138,7 +142,14 @@ def chat():
         usuario_id=session["user_id"]
     ).order_by(Conversa.id.desc()).all()
 
-    return render_template("chat.html", historico=historico)
+    return render_template(
+        "chat.html",
+        historico=historico,
+        modos=VALID_PROMPT_MODES,
+        prompt_types=VALID_PROMPT_TYPES,
+        selected_modo=modo,
+        selected_tipo_prompt=tipo_prompt,
+    )
 
 
 @app.route("/logout")

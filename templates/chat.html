@@ -26,15 +26,40 @@
 </div>
 
 <div class="form-container">
-    <form method='post' style="display: flex; gap: 10px; width: 100%;">
-        <input 
-            type='text' 
-            name='pergunta' 
-            placeholder='Digite sua pergunta...' 
-            autocomplete='off'
-            required
-        >
-        <button type='submit'>Enviar</button>
+    <form method='post' style="display: grid; gap: 10px; width: 100%;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label style="flex: 1; min-width: 180px;">
+                Modo:
+                <select name="modo" style="width: 100%; padding: 8px; margin-top: 4px;">
+                    {% for modo in modos %}
+                    <option value="{{ modo }}" {% if modo == selected_modo %}selected{% endif %}>
+                        {{ modo.replace('_', ' ').capitalize() }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label style="flex: 1; min-width: 180px;">
+                Tipo de prompt:
+                <select name="tipo_prompt" style="width: 100%; padding: 8px; margin-top: 4px;">
+                    {% for tipo in prompt_types %}
+                    <option value="{{ tipo }}" {% if tipo == selected_tipo_prompt %}selected{% endif %}>
+                        {{ tipo.replace('_', ' ').capitalize() }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input 
+                type='text' 
+                name='pergunta' 
+                placeholder='Digite sua pergunta...' 
+                autocomplete='off'
+                required
+                style='flex: 1; padding: 10px;'
+            >
+            <button type='submit'>Enviar</button>
+        </div>
     </form>
 </div>
 
