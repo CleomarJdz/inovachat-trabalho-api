@@ -339,6 +339,93 @@ a:hover {
     font-size: 14px;
 }
 
+.ia-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-top: 6px;
+    display: inline-block;
+    letter-spacing: 0.3px;
+}
+
+.ia-badge.openai {
+    background: rgba(16, 163, 127, 0.15);
+    color: #10a37f;
+    border: 1px solid rgba(16, 163, 127, 0.3);
+}
+
+.ia-badge.gemini {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.ia-badge.ambos {
+    background: rgba(234, 179, 8, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.ia-badge.na {
+    background: rgba(100, 100, 100, 0.15);
+    color: #888;
+    border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.copy-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: unset;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: #2d2d44;
+    color: #ececf1;
+    border-color: #666;
+    transform: none;
+}
+
+.copy-btn.copiado {
+    color: #10a37f;
+    border-color: #10a37f;
+}
+
+.btn-limpar {
+    background: transparent;
+    color: #888;
+    border: 1px solid #555;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: unset;
+    transition: all 0.2s;
+    margin-left: 8px;
+}
+
+.btn-limpar:hover {
+    background: #3a1a1a;
+    color: #f87171;
+    border-color: #f87171;
+    transform: none;
+}
+
 select {
     background: #2d2d44;
     border: 1px solid #444;

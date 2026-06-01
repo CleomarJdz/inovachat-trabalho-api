@@ -44,18 +44,25 @@ class Conversa(db.Model):
     usuario_id = db.Column(db.Integer)
     pergunta = db.Column(db.Text)
     resposta = db.Column(db.Text)
+    ia_usada = db.Column(db.String(20), nullable=True)
     data = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 with app.app_context():
     db.create_all()
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text('ALTER TABLE conversa ADD COLUMN ia_usada VARCHAR(20)'))
+            conn.commit()
+    except Exception:
+        pass
 
 def responder_ia(pergunta, modo="tecnico", tipo_prompt="simples"):
     try:
-        resposta = perguntar_ia(pergunta, modo=modo, prompt_type=tipo_prompt)
-        return resposta
+        resposta, ia_usada = perguntar_ia(pergunta, modo=modo, prompt_type=tipo_prompt)
+        return resposta, ia_usada
     except Exception as erro:
-        return f'Erro IA: {erro}'
+        return f'Erro IA: {erro}', 'N/A'
 
 @app.route("/")
 def home():
@@ -130,12 +137,13 @@ def chat():
         pergunta = request.form["pergunta"]
         modo = request.form.get("modo", modo)
         tipo_prompt = request.form.get("tipo_prompt", tipo_prompt)
-        resposta = responder_ia(pergunta, modo=modo, tipo_prompt=tipo_prompt)
+        resposta, ia_usada = responder_ia(pergunta, modo=modo, tipo_prompt=tipo_prompt)
 
         nova = Conversa(
             usuario_id=session["user_id"],
             pergunta=pergunta,
-            resposta=resposta
+            resposta=resposta,
+            ia_usada=ia_usada
         )
 
         db.session.add(nova)
@@ -153,6 +161,15 @@ def chat():
         selected_modo=modo,
         selected_tipo_prompt=tipo_prompt,
     )
+
+
+@app.route("/limpar", methods=["POST"])
+def limpar():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    Conversa.query.filter_by(usuario_id=session["user_id"]).delete()
+    db.session.commit()
+    return redirect(url_for("chat"))
 
 
 @app.route("/logout")

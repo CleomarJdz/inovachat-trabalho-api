@@ -1,9 +1,14 @@
 {% extends 'base.html' %}{% block content %}
 <div class="header">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="INOVACHAT 2.0" style="height: 40px; margin-right: 20px;">
-    <div>
+    <div style="display: flex; align-items: center; gap: 8px;">
         <span style="color: #888; font-size: 14px;">Olá, {{session.nome}}</span>
-        <a href='/logout' style="margin-left: 10px;">Sair</a>
+        {% if historico|length > 0 %}
+        <form method="post" action="/limpar" style="display:inline;" onsubmit="return confirm('Limpar toda a conversa?')">
+            <button type="submit" class="btn-limpar">Limpar</button>
+        </form>
+        {% endif %}
+        <a href='/logout'>Sair</a>
     </div>
 </div>
 
@@ -21,7 +26,21 @@
     </div>
     <div class="message assistant">
         <div class="message-avatar">IA</div>
-        <div class="message-content">{{ item.resposta|markdown|safe }}</div>
+        <div>
+            <div class="message-content">{{ item.resposta|markdown|safe }}</div>
+            <div class="message-meta">
+                {% if item.ia_usada == "OpenAI" %}
+                    <span class="ia-badge openai">OpenAI</span>
+                {% elif item.ia_usada == "Gemini" %}
+                    <span class="ia-badge gemini">Gemini</span>
+                {% elif item.ia_usada == "OpenAI + Gemini" %}
+                    <span class="ia-badge ambos">OpenAI + Gemini</span>
+                {% elif item.ia_usada %}
+                    <span class="ia-badge na">{{ item.ia_usada }}</span>
+                {% endif %}
+                <button class="copy-btn" onclick="copiarResposta(this)" data-texto="{{ item.resposta | e }}">Copiar</button>
+            </div>
+        </div>
     </div>
     {% endfor %}
     {% endif %}
@@ -78,7 +97,6 @@
         const texto = input.value.trim();
         if (!texto) return;
 
-        // Bolha do usuário
         const userMsg = document.createElement('div');
         userMsg.className = 'message user';
         userMsg.innerHTML = `
@@ -87,7 +105,6 @@
         `;
         chatContainer.appendChild(userMsg);
 
-        // Bolha de loading da IA
         const loadingMsg = document.createElement('div');
         loadingMsg.className = 'message assistant';
         loadingMsg.id = 'loadingMsg';
@@ -104,6 +121,18 @@
         btn.textContent = 'Enviando...';
         btn.style.opacity = '0.6';
     });
+
+    function copiarResposta(btn) {
+        const texto = btn.getAttribute('data-texto');
+        navigator.clipboard.writeText(texto).then(() => {
+            btn.textContent = 'Copiado!';
+            btn.classList.add('copiado');
+            setTimeout(() => {
+                btn.textContent = 'Copiar';
+                btn.classList.remove('copiado');
+            }, 2000);
+        });
+    }
 </script>
 
 {% endblock %}

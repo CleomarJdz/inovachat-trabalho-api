@@ -119,51 +119,54 @@ def ask_gemini(prompt: str) -> str:
     return str(response).strip()
 
 
-def choose_best_response(openai_text: str | None, gemini_text: str | None, mode: str) -> str:
+def choose_best_response(openai_text: str | None, gemini_text: str | None, mode: str) -> tuple[str, str]:
     if not openai_text:
-        return gemini_text or "Não foi possível gerar resposta."
+        return gemini_text or "Não foi possível gerar resposta.", "Gemini"
     if not gemini_text:
-        return openai_text
+        return openai_text, "OpenAI"
 
     if mode == "resumido":
-        return min([openai_text, gemini_text], key=len)
+        best = min([openai_text, gemini_text], key=len)
+        return best, "OpenAI" if best == openai_text else "Gemini"
     if mode == "detalhado":
-        return max([openai_text, gemini_text], key=len)
+        best = max([openai_text, gemini_text], key=len)
+        return best, "OpenAI" if best == openai_text else "Gemini"
     if mode == "suporte":
-        return gemini_text
+        return gemini_text, "Gemini"
     if mode == "professor":
-        return openai_text
+        return openai_text, "OpenAI"
     if mode == "tecnico":
-        return openai_text
+        return openai_text, "OpenAI"
 
-    return openai_text
+    return openai_text, "OpenAI"
 
 
-def merge_responses(openai_text: str | None, gemini_text: str | None, mode: str) -> str:
+def merge_responses(openai_text: str | None, gemini_text: str | None, mode: str) -> tuple[str, str]:
     if not openai_text:
-        return gemini_text or "Não foi possível gerar resposta."
+        return gemini_text or "Não foi possível gerar resposta.", "Gemini"
     if not gemini_text:
-        return openai_text
+        return openai_text, "OpenAI"
 
     if mode == "resumido":
-        return min([openai_text, gemini_text], key=len)
+        best = min([openai_text, gemini_text], key=len)
+        return best, "OpenAI" if best == openai_text else "Gemini"
 
     return (
         f"Resposta primária (OpenAI):\n{openai_text}\n\n"
         f"Segunda opinião (Gemini):\n{gemini_text}"
-    )
+    ), "OpenAI + Gemini"
 
 
-def perguntar_ia(texto: str, modo: str = "tecnico", prompt_type: str = "simples") -> str:
+def perguntar_ia(texto: str, modo: str = "tecnico", prompt_type: str = "simples") -> tuple[str, str]:
     texto_limpo = sanitize_input(texto)
     if not texto_limpo:
-        return "Por favor, informe uma pergunta válida."
+        return "Por favor, informe uma pergunta válida.", "N/A"
 
     if detect_malicious(texto_limpo):
         return (
             "Pedido recusado: solicitação potencialmente maliciosa ou inadequada detectada. "
             "Por favor, reformule sua pergunta e tente novamente."
-        )
+        ), "N/A"
 
     modo = modo if modo in VALID_PROMPT_MODES else "tecnico"
     prompt_type = prompt_type if prompt_type in VALID_PROMPT_TYPES else "simples"
