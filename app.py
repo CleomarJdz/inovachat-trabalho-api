@@ -6,20 +6,23 @@ from datetime import datetime
 import google.generativeai as genai
 import markdown
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Importar LangChain
 from langchain import perguntar_ia, VALID_PROMPT_MODES, VALID_PROMPT_TYPES
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "123456"
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:120206@localhost:5432/inovachat"
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAxNX2RDM1CRMlTLyV3zz3XOPBMlt8nVyk')
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
 @app.template_filter('markdown')

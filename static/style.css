@@ -338,3 +338,92 @@ a:hover {
     padding: 40px;
     font-size: 14px;
 }
+
+select {
+    background: #2d2d44;
+    border: 1px solid #444;
+    color: #ececf1;
+    padding: 8px 32px 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+select:focus {
+    border-color: #10a37f;
+}
+
+select option {
+    background: #2d2d44;
+    color: #ececf1;
+}
+
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    align-self: flex-end;
+}
+
+.message.user .message-avatar {
+    background: #10a37f;
+    color: #fff;
+    order: 2;
+}
+
+.message.assistant .message-avatar {
+    background: #444;
+    color: #ececf1;
+}
+
+.message.user {
+    align-items: flex-end;
+}
+
+.message.assistant {
+    align-items: flex-end;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-bubble {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 14px 18px;
+    background: #2d2d44;
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    max-width: 80px;
+}
+
+.loading-bubble span {
+    width: 8px;
+    height: 8px;
+    background: #10a37f;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+}
+
+.loading-bubble span:nth-child(2) { animation-delay: 0.2s; }
+.loading-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}

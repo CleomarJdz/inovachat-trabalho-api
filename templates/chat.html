@@ -11,14 +11,16 @@
     {% if historico|length == 0 %}
     <div class="empty-state">
         <h2 style="color: #ccc; margin-bottom: 10px;">Bem-vindo ao INOVACHAT 2.0</h2>
-        <p>Comece uma conversa fazendo uma pergunta ao Gemini</p>
+        <p>Comece uma conversa fazendo uma pergunta à IA</p>
     </div>
     {% else %}
     {% for item in historico|reverse %}
     <div class="message user">
         <div class="message-content">{{ item.pergunta }}</div>
+        <div class="message-avatar">{{ session.nome[0].upper() }}</div>
     </div>
     <div class="message assistant">
+        <div class="message-avatar">IA</div>
         <div class="message-content">{{ item.resposta|markdown|safe }}</div>
     </div>
     {% endfor %}
@@ -26,11 +28,11 @@
 </div>
 
 <div class="form-container">
-    <form method='post' style="display: grid; gap: 10px; width: 100%;">
+    <form method='post' id="chatForm" style="display: grid; gap: 10px; width: 100%;">
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <label style="flex: 1; min-width: 180px;">
                 Modo:
-                <select name="modo" style="width: 100%; padding: 8px; margin-top: 4px;">
+                <select name="modo" style="width: 100%; margin-top: 4px;">
                     {% for modo in modos %}
                     <option value="{{ modo }}" {% if modo == selected_modo %}selected{% endif %}>
                         {{ modo.replace('_', ' ').capitalize() }}
@@ -40,7 +42,7 @@
             </label>
             <label style="flex: 1; min-width: 180px;">
                 Tipo de prompt:
-                <select name="tipo_prompt" style="width: 100%; padding: 8px; margin-top: 4px;">
+                <select name="tipo_prompt" style="width: 100%; margin-top: 4px;">
                     {% for tipo in prompt_types %}
                     <option value="{{ tipo }}" {% if tipo == selected_tipo_prompt %}selected{% endif %}>
                         {{ tipo.replace('_', ' ').capitalize() }}
@@ -50,26 +52,58 @@
             </label>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
-            <input 
-                type='text' 
-                name='pergunta' 
-                placeholder='Digite sua pergunta...' 
+            <input
+                type='text'
+                name='pergunta'
+                id='perguntaInput'
+                placeholder='Digite sua pergunta...'
                 autocomplete='off'
                 required
                 style='flex: 1; padding: 10px;'
             >
-            <button type='submit'>Enviar</button>
+            <button type='submit' id='submitBtn'>Enviar</button>
         </div>
     </form>
 </div>
 
 <script>
-    // Auto-scroll para o final
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.scrollTop = chatContainer.scrollHeight;
-    
-    // Focus no input após enviar
-    document.querySelector('input[name="pergunta"]').focus();
+
+    document.getElementById('perguntaInput').focus();
+
+    document.getElementById('chatForm').addEventListener('submit', function () {
+        const input = document.getElementById('perguntaInput');
+        const btn = document.getElementById('submitBtn');
+        const texto = input.value.trim();
+        if (!texto) return;
+
+        // Bolha do usuário
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message user';
+        userMsg.innerHTML = `
+            <div class="message-content">${texto}</div>
+            <div class="message-avatar">{{ session.nome[0].upper() }}</div>
+        `;
+        chatContainer.appendChild(userMsg);
+
+        // Bolha de loading da IA
+        const loadingMsg = document.createElement('div');
+        loadingMsg.className = 'message assistant';
+        loadingMsg.id = 'loadingMsg';
+        loadingMsg.innerHTML = `
+            <div class="message-avatar">IA</div>
+            <div class="loading-bubble">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        chatContainer.appendChild(loadingMsg);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        btn.style.opacity = '0.6';
+    });
 </script>
 
 {% endblock %}
