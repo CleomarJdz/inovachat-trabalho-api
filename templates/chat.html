@@ -29,14 +29,19 @@
         <div>
             <div class="message-content">{{ item.resposta|markdown|safe }}</div>
             <div class="message-meta">
-                {% if item.ia_usada == "Llama 8B" %}
-                    <span class="ia-badge llama8b">Llama 8B</span>
-                {% elif item.ia_usada == "Llama 70B" %}
-                    <span class="ia-badge llama70b">Llama 70B</span>
-                {% elif item.ia_usada == "Llama 8B + 70B" %}
-                    <span class="ia-badge ambos">Llama 8B + 70B</span>
-                {% elif item.ia_usada %}
-                    <span class="ia-badge na">{{ item.ia_usada }}</span>
+                {% if item.ia_usada %}
+                    {% set ia = item.ia_usada %}
+                    {% if "+ Web" in ia %}
+                        <span class="ia-badge web">{{ ia }}</span>
+                    {% elif ia == "Llama 8B" %}
+                        <span class="ia-badge llama8b">Llama 8B</span>
+                    {% elif ia == "Llama 70B" %}
+                        <span class="ia-badge llama70b">Llama 70B</span>
+                    {% elif ia == "Llama 8B + 70B" %}
+                        <span class="ia-badge ambos">Llama 8B + 70B</span>
+                    {% else %}
+                        <span class="ia-badge na">{{ ia }}</span>
+                    {% endif %}
                 {% endif %}
                 <button class="copy-btn" onclick="copiarResposta(this)" data-texto="{{ item.resposta | e }}">Copiar</button>
             </div>
