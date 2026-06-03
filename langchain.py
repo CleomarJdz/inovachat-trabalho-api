@@ -1,17 +1,18 @@
 # langchain.py
-# Módulo para integração com LangChain, OpenAI e Gemini
+# Módulo para integração com LangChain e Groq (modelos Llama)
 
 import os
 import re
-import google.generativeai as genai
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
 
-if os.getenv("GEMINI_API_KEY"):
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+MODEL_PRIMARY = os.getenv("GROQ_MODEL_PRIMARY", "llama-3.1-8b-instant")
+MODEL_SECONDARY = os.getenv("GROQ_MODEL_SECONDARY", "llama-3.3-70b-versatile")
 
 AI_MODES = {
     "tecnico": "Você é um assistente técnico. Responda com precisão, linguagem clara e foco em soluções.",
@@ -56,18 +57,6 @@ INJECTION_PATTERNS = [
     "escape the sandbox",
 ]
 
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash-002")
-OPENAI_MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-3.5-turbo")
-OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
-
-llm = ChatOpenAI(
-    model=OPENAI_MODEL_NAME,
-    temperature=OPENAI_TEMPERATURE
-)
-
-prompt_template = ChatPromptTemplate.from_template("{final_prompt}")
-chain = prompt_template | llm
-
 
 def sanitize_input(text: str) -> str:
     text = re.sub(r"<[^>]+>", "", text)
@@ -104,57 +93,52 @@ def build_prompt_text(user_text: str, mode: str, prompt_type: str) -> str:
     return "\n\n".join(prompt_parts)
 
 
-def ask_openai(prompt: str) -> str:
-    resposta = chain.invoke({"final_prompt": prompt})
-    return getattr(resposta, "content", str(resposta)).strip()
+def _groq_llm(model: str) -> ChatOpenAI:
+    return ChatOpenAI(model=model, api_key=GROQ_API_KEY, base_url=GROQ_BASE_URL)
 
 
-def ask_gemini(prompt: str) -> str:
-    model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-    chat = model.start_chat(system_instruction=build_system_instructions())
-    response = chat.send_message(prompt)
-    text = getattr(response, "text", None)
-    if text:
-        return text.strip()
-    return str(response).strip()
+def ask_primary(prompt: str) -> str:
+    chain = ChatPromptTemplate.from_template("{p}") | _groq_llm(MODEL_PRIMARY)
+    return chain.invoke({"p": prompt}).content.strip()
 
 
-def choose_best_response(openai_text: str | None, gemini_text: str | None, mode: str) -> tuple[str, str]:
-    if not openai_text:
-        return gemini_text or "Não foi possível gerar resposta.", "Gemini"
-    if not gemini_text:
-        return openai_text, "OpenAI"
+def ask_secondary(prompt: str) -> str:
+    chain = ChatPromptTemplate.from_template("{p}") | _groq_llm(MODEL_SECONDARY)
+    return chain.invoke({"p": prompt}).content.strip()
+
+
+def choose_best_response(primary: str | None, secondary: str | None, mode: str) -> tuple[str, str]:
+    if not primary:
+        return secondary or "Não foi possível gerar resposta.", "Llama 70B"
+    if not secondary:
+        return primary, "Llama 8B"
 
     if mode == "resumido":
-        best = min([openai_text, gemini_text], key=len)
-        return best, "OpenAI" if best == openai_text else "Gemini"
+        best = min([primary, secondary], key=len)
+        return best, "Llama 8B" if best == primary else "Llama 70B"
     if mode == "detalhado":
-        best = max([openai_text, gemini_text], key=len)
-        return best, "OpenAI" if best == openai_text else "Gemini"
-    if mode == "suporte":
-        return gemini_text, "Gemini"
-    if mode == "professor":
-        return openai_text, "OpenAI"
-    if mode == "tecnico":
-        return openai_text, "OpenAI"
+        best = max([primary, secondary], key=len)
+        return best, "Llama 8B" if best == primary else "Llama 70B"
+    if mode in ("suporte", "professor", "detalhado"):
+        return secondary, "Llama 70B"
 
-    return openai_text, "OpenAI"
+    return primary, "Llama 8B"
 
 
-def merge_responses(openai_text: str | None, gemini_text: str | None, mode: str) -> tuple[str, str]:
-    if not openai_text:
-        return gemini_text or "Não foi possível gerar resposta.", "Gemini"
-    if not gemini_text:
-        return openai_text, "OpenAI"
+def merge_responses(primary: str | None, secondary: str | None, mode: str) -> tuple[str, str]:
+    if not primary:
+        return secondary or "Não foi possível gerar resposta.", "Llama 70B"
+    if not secondary:
+        return primary, "Llama 8B"
 
     if mode == "resumido":
-        best = min([openai_text, gemini_text], key=len)
-        return best, "OpenAI" if best == openai_text else "Gemini"
+        best = min([primary, secondary], key=len)
+        return best, "Llama 8B" if best == primary else "Llama 70B"
 
     return (
-        f"Resposta primária (OpenAI):\n{openai_text}\n\n"
-        f"Segunda opinião (Gemini):\n{gemini_text}"
-    ), "OpenAI + Gemini"
+        f"Resposta rápida (Llama 8B):\n{primary}\n\n"
+        f"Resposta detalhada (Llama 70B):\n{secondary}"
+    ), "Llama 8B + 70B"
 
 
 def perguntar_ia(texto: str, modo: str = "tecnico", prompt_type: str = "simples") -> tuple[str, str]:
@@ -172,20 +156,20 @@ def perguntar_ia(texto: str, modo: str = "tecnico", prompt_type: str = "simples"
     prompt_type = prompt_type if prompt_type in VALID_PROMPT_TYPES else "simples"
     prompt_text = build_prompt_text(texto_limpo, modo, prompt_type)
 
-    openai_text = None
-    gemini_text = None
+    primary_text = None
+    secondary_text = None
 
     try:
-        openai_text = ask_openai(prompt_text)
-    except Exception:
-        openai_text = None
+        primary_text = ask_primary(prompt_text)
+    except Exception as e:
+        print(f"[Llama 8B ERRO] {e}")
 
     try:
-        gemini_text = ask_gemini(prompt_text)
-    except Exception:
-        gemini_text = None
+        secondary_text = ask_secondary(prompt_text)
+    except Exception as e:
+        print(f"[Llama 70B ERRO] {e}")
 
     if prompt_type == "especializado":
-        return merge_responses(openai_text, gemini_text, modo)
+        return merge_responses(primary_text, secondary_text, modo)
 
-    return choose_best_response(openai_text, gemini_text, modo)
+    return choose_best_response(primary_text, secondary_text, modo)

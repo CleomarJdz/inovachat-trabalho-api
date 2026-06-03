@@ -29,12 +29,12 @@
         <div>
             <div class="message-content">{{ item.resposta|markdown|safe }}</div>
             <div class="message-meta">
-                {% if item.ia_usada == "OpenAI" %}
-                    <span class="ia-badge openai">OpenAI</span>
-                {% elif item.ia_usada == "Gemini" %}
-                    <span class="ia-badge gemini">Gemini</span>
-                {% elif item.ia_usada == "OpenAI + Gemini" %}
-                    <span class="ia-badge ambos">OpenAI + Gemini</span>
+                {% if item.ia_usada == "Llama 8B" %}
+                    <span class="ia-badge llama8b">Llama 8B</span>
+                {% elif item.ia_usada == "Llama 70B" %}
+                    <span class="ia-badge llama70b">Llama 70B</span>
+                {% elif item.ia_usada == "Llama 8B + 70B" %}
+                    <span class="ia-badge ambos">Llama 8B + 70B</span>
                 {% elif item.ia_usada %}
                     <span class="ia-badge na">{{ item.ia_usada }}</span>
                 {% endif %}
